@@ -61,7 +61,7 @@ def nx_to_mol(G):
     Chem.SanitizeMol(mol)
     return mol
 
-def do_all(smiles, validate=False):
+def smiles_to_nx(smiles, validate=False):
     mol = Chem.MolFromSmiles(smiles.strip())
     can_smi = Chem.MolToSmiles(mol)
     G = mol_to_nx(mol)
@@ -75,7 +75,7 @@ def main():
     args = get_arguments()
     i = open(args.smiles)
     p = multiprocessing.Pool(args.num_processes)
-    results = p.map(do_all, i.xreadlines())
+    results = p.map(smiles_to_nx, i.xreadlines())
     o = open(args.nx_pickle, 'w')
     for result in results:
         nx.write_gpickle(result, o)
