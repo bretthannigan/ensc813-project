@@ -1,0 +1,3 @@
+[submodule "keras-molecules"]
+	path = keras-molecules
+	url = https://github.com/dakoner/keras-molecules.git
