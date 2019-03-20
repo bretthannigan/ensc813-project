@@ -1,9 +1,7 @@
 import sys
-print(sys.path)
 import csv
 
 import numpy as np
-#import rdkit
 from rdkit.Chem import AllChem as Chem
 
 NUM_RXNS_TO_READ = 10000
