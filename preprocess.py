@@ -7,36 +7,42 @@ from rdkit.Chem import Draw
 
 import ReactionGraph
 
-NUM_RXNS_TO_READ = 10
+NUM_RXNS_TO_READ = 10000
 
 with open("data/1976_Sep2016_USPTOgrants_smiles.rsmi", newline='') as f:
     csv_reader = csv.reader(f, delimiter='\t')
     next(csv_reader)
-    line_count = 0
-    reactions = []
+    reaction = []
+    try_count = 0
+    success_count = 0
+    fail_count = 0
+    error = False
     for row in csv_reader:
-        reactions.append(Chem.ReactionFromSmarts(row[0].split(None, 1)[0]))
-        line_count += 1
-        if line_count == NUM_RXNS_TO_READ:
+        fail_count += error
+        error = False
+        try_count += 1
+        row = row[0].split(None, 1)[0]
+        reac, _, prod = row.split(">")
+        reac = reac.split(".")
+        reac = [Chem.MolFromSmiles(r) for r in reac]
+        try:
+            for r in reac:
+                Chem.SanitizeMol(r)
+        except:
+            error = True
+            print("\tSkipping reaction on line {}, error in reactant SMILES.".format(try_count + 1))
+            continue
+        prod = prod.split(".")
+        prod = [Chem.MolFromSmiles(p) for p in prod]
+        try:
+            for p in prod:
+                Chem.SanitizeMol(p)
+        except:
+            error = True
+            print("\tSkipping reaction on line {}, error in products SMILES".format(try_count + 1))
+            continue
+        reaction.append(ReactionGraph.ReactionGraph.from_rdMol(reac, prod))
+        success_count += 1
+        if success_count >= NUM_RXNS_TO_READ:
             break
-
-num_reactant_atoms = np.zeros(len(reactions), dtype=np.int32)
-num_product_atoms = np.zeros(len(reactions), dtype=np.int32)
-for i, rxn in enumerate(reactions):
-    reac = Chem.ChemicalReaction.GetReactants(rxn)
-    prod = Chem.ChemicalReaction.GetProducts(rxn)
-    for r in reac:
-        num_reactant_atoms[i] += r.GetNumAtoms()
-    for p in prod:
-        num_product_atoms[i] += p.GetNumAtoms()
-Chem.SanitizeRxn(reactions[0])
-test = ReactionGraph.ReactionGraph.from_ChemicalReaction(reactions[8])
-test.num_atoms = 100
-y = test.A_reac
-test.f_reac
-mol = Chem.ChemicalReaction.GetReactants(reactions[7])[0]
-Draw.MolToImage(mol).show()
-Chem.SanitizeMol(mol)
-Draw.MolToImage(mol).show()
-m2 = Chem.MolFromSmiles('[CH3:1][C:2]1[N:3]=[CH:4][C:5]2=[CH:6][CH:7]=[CH:8][C:9](=[C:10]2[CH:11]=1)[N:12](=[O:13])[OH:14]')
-x = 5
+    print("Attempted import of {} reactions with {} successes and {} errors.".format(try_count, success_count, fail_count))

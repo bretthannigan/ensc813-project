@@ -37,18 +37,31 @@ class ReactionGraph:
             product.append(convert_rdkit_to_networkx.mol_to_nx(mol))
         return cls(reactant, product)
 
+    @classmethod
+    def from_rdMol(cls, reac, prod):
+        reactant = []
+        product = []
+        for mol in reac:
+            reactant.append(convert_rdkit_to_networkx.mol_to_nx(mol))
+        for mol in prod:
+            product.append(convert_rdkit_to_networkx.mol_to_nx(mol))
+        return cls(reactant, product)
+
     @property
     def A_reac(self):
         A = [nx.adjacency_matrix(i) for i in self.reactant]
         A = scipy.sparse.block_diag(A, format='csr')
         if np.any(self.num_atoms - np.asarray(A.shape)):
             A.resize(self.num_atoms, self.num_atoms)
-        return 
+        return A
 
     @property
     def A_prod(self):
         A = [nx.adjacency_matrix(i) for i in self.product]
-        return scipy.sparse.block_diag(A, format='csr')
+        A = scipy.sparse.block_diag(A, format='csr')
+        if np.any(self.num_atoms - np.asarray(A.shape)):
+            A.resize(self.num_atoms, self.num_atoms)
+        return A
 
     @property
     def f_reac(self):
