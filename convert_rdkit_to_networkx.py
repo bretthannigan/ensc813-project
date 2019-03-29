@@ -1,9 +1,11 @@
 from __future__ import print_function
 
 import networkx as nx
+import numpy as np
 import argparse
 import multiprocessing
 from rdkit import Chem
+from rdkit.Chem import Draw
 
 NUM_PROCESSES = 8
 
@@ -14,23 +16,37 @@ def get_arguments():
     parser.add_argument('--num_processes', type=int, default=NUM_PROCESSES, help='The number of concurrent processes to use when converting.')
     return parser.parse_args()
     
-def mol_to_nx(mol):
+def mol_to_nx(mol, is_map_order=False):
     G = nx.Graph()
-
+    idx_to_map_num = {}
+    if is_map_order:
+        mapped_atoms = {at.GetAtomMapNum() for at in mol.GetAtoms()}.difference({0})
+        all_atoms = {i for i in range(1, max(mapped_atoms.union({Chem.Mol.GetNumAtoms(mol)})) + 1)}
+        unmapped_atoms = sorted(all_atoms.difference(mapped_atoms))
+        i_unmapped_atoms = 0
+        for atom in mol.GetAtoms():
+            if atom.GetAtomMapNum() != 0:
+                idx_to_map_num[atom.GetIdx()] = atom.GetAtomMapNum() - 1 # AtomMapNum indices are 1-based.
+            else:
+                idx_to_map_num[atom.GetIdx()] = unmapped_atoms[i_unmapped_atoms] - 1
+                i_unmapped_atoms += 1
+    else:
+        for atom in mol.GetAtoms():
+            idx_to_map_num[atom.GetIdx()] = atom.GetIdx()
     for atom in mol.GetAtoms():
-        G.add_node(atom.GetIdx(),
+        G.add_node(idx_to_map_num[atom.GetIdx()],
                    atomic_num=atom.GetAtomicNum(),
                    formal_charge=atom.GetFormalCharge(),
                    chiral_tag=atom.GetChiralTag(),
                    hybridization=atom.GetHybridization(),
                    num_explicit_hs=atom.GetNumExplicitHs(),
                    is_aromatic=atom.GetIsAromatic())
-        G.add_edge(atom.GetIdx(),
-                   atom.GetIdx(),
+        G.add_edge(idx_to_map_num[atom.GetIdx()],
+                   idx_to_map_num[atom.GetIdx()],
                    bond_type=Chem.rdchem.BondType.OTHER) # Add self-loops.
     for bond in mol.GetBonds():
-        G.add_edge(bond.GetBeginAtomIdx(),
-                   bond.GetEndAtomIdx(),
+        G.add_edge(idx_to_map_num[bond.GetBeginAtomIdx()],
+                   idx_to_map_num[bond.GetEndAtomIdx()],
                    bond_type=bond.GetBondType())
     return G
 
