@@ -3,8 +3,11 @@ import csv
 
 import numpy as np
 from rdkit.Chem import AllChem as Chem
+from rdkit.Chem import Draw
 
-NUM_RXNS_TO_READ = 10000
+import ReactionGraph
+
+NUM_RXNS_TO_READ = 10
 
 with open("data/1976_Sep2016_USPTOgrants_smiles.rsmi", newline='') as f:
     csv_reader = csv.reader(f, delimiter='\t')
@@ -26,5 +29,14 @@ for i, rxn in enumerate(reactions):
         num_reactant_atoms[i] += r.GetNumAtoms()
     for p in prod:
         num_product_atoms[i] += p.GetNumAtoms()
-
+Chem.SanitizeRxn(reactions[0])
+test = ReactionGraph.ReactionGraph.from_ChemicalReaction(reactions[8])
+test.num_atoms = 100
+y = test.A_reac
+test.f_reac
+mol = Chem.ChemicalReaction.GetReactants(reactions[7])[0]
+Draw.MolToImage(mol).show()
+Chem.SanitizeMol(mol)
+Draw.MolToImage(mol).show()
+m2 = Chem.MolFromSmiles('[CH3:1][C:2]1[N:3]=[CH:4][C:5]2=[CH:6][CH:7]=[CH:8][C:9](=[C:10]2[CH:11]=1)[N:12](=[O:13])[OH:14]')
 x = 5

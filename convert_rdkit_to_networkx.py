@@ -25,6 +25,9 @@ def mol_to_nx(mol):
                    hybridization=atom.GetHybridization(),
                    num_explicit_hs=atom.GetNumExplicitHs(),
                    is_aromatic=atom.GetIsAromatic())
+        G.add_edge(atom.GetIdx(),
+                   atom.GetIdx(),
+                   bond_type=Chem.rdchem.BondType.OTHER) # Add self-loops.
     for bond in mol.GetBonds():
         G.add_edge(bond.GetBeginAtomIdx(),
                    bond.GetEndAtomIdx(),
