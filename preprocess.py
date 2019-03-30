@@ -5,13 +5,17 @@ import numpy as np
 import pickle
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem import Draw
+from sklearn.model_selection import train_test_split
 import scipy.sparse as sp
 
 import ReactionGraph as rg
 
+# Import
 DATA_FILE = "data/1976_Sep2016_USPTOgrants_smiles.rsmi"
 NUM_RXNS_TO_READ = 1000
 MAX_NUM_ATOMS = 128
+# Test/validation
+TRAIN_FRACTION = 0.8
 
 with open(DATA_FILE, newline='') as f:
     csv_reader = csv.reader(f, delimiter='\t')
@@ -67,4 +71,7 @@ A = [r.get_adjacency(normalize=True) for r in reactant]
 X = [r.get_features() for r in reactant]
 y = [p.get_adjacency(normalize=True) for p in product]
 X_y = [p.get_features() for p in product]
+
+A_train, A_test, X_train, X_test, y_train, y_test, X_y_train, X_y_test = train_test_split(A, X, y, X_y, train_size=TRAIN_FRACTION, random_state=0, shuffle=True)
+
 x = 5
