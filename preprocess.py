@@ -5,7 +5,6 @@ import numpy as np
 import pickle
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem import Draw
-from sklearn.model_selection import train_test_split
 import scipy.sparse as sp
 
 import ReactionGraph as rg
@@ -60,18 +59,15 @@ with open(DATA_FILE, newline='') as f:
             break
     print("Attempted import of {} reactions with {} successes and {} skips.".format(try_count, success_count, fail_count))
 
-with open("LoweUSPTOGrants_1976-2016_{}Atoms_{}Reactions.pickle".format(MAX_NUM_ATOMS, NUM_RXNS_TO_READ), 'wb') as f:
+with open("/data/LoweUSPTOGrants_1976-2016_{}Atoms_{}Reactions.pickle".format(MAX_NUM_ATOMS, NUM_RXNS_TO_READ), 'wb') as f:
     pickle.dump(reactant, f)
     pickle.dump(product, f)
-# with open("LoweUSPTOGrants_1976-2016_128Atoms_1000Reactions.pickle", 'rb') as f:
-#     e = pickle.load(f)
-#     g = pickle.load(f)
 
 A = [r.get_adjacency(normalize=True) for r in reactant]
 X = [r.get_features() for r in reactant]
 y = [p.get_adjacency(normalize=True) for p in product]
 X_y = [p.get_features() for p in product]
 
-A_train, A_test, X_train, X_test, y_train, y_test, X_y_train, X_y_test = train_test_split(A, X, y, X_y, train_size=TRAIN_FRACTION, random_state=0, shuffle=True)
+
 
 x = 5
