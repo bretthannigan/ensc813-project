@@ -1,3 +1,6 @@
 [submodule "keras-molecules"]
 	path = keras-molecules
 	url = https://github.com/dakoner/keras-molecules.git
+[submodule "relational-gcn"]
+	path = relational-gcn
+	url = git@github.com:bretthannigan/relational-gcn.git
