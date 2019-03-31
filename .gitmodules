@@ -4,3 +4,6 @@
 [submodule "relational-gcn"]
 	path = relational-gcn
 	url = git@github.com:bretthannigan/relational-gcn.git
+[submodule "keras-gcn"]
+	path = keras-gcn
+	url = https://github.com/CyberZHG/keras-gcn.git
