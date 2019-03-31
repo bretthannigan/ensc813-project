@@ -15,14 +15,12 @@ from keras.optimizers import Adam
 from keras.regularizers import l1, l2
 from sklearn.model_selection import train_test_split
 
-from rgcn.layers.graph import GraphConvolution
-from rgcn.layers.input_adj import InputAdj
-from rgcn.utils import *
+from kegra.layers.graph import GraphConvolution
+from kegra.utils import *
 
 import pickle as pkl
 
 import time
-import argparse
 
 from ReactionData import DataGenerator
 
@@ -31,7 +29,7 @@ np.random.seed()
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--dataset", type=str, default="LoweUSPTOGrants_1976-2016_128Atoms_1000Reactions.pickle",
                 help="Dataset string ('aifb', 'mutag', 'bgs', 'am')")
-ap.add_argument("-e", "--epochs", type=int, default=10,
+ap.add_argument("-e", "--epochs", type=int, default=500,
                 help="Number training epochs")
 ap.add_argument("-hd", "--hidden", type=int, default=256,
                 help="Number hidden units")
@@ -87,12 +85,12 @@ validation_data_generator = DataGenerator(A_test, X_test, y_test, X_y_test, batc
 # Define model architecture
 X_in = Input(shape=(X[0].shape[1],))
 H = Dropout(DO)(X_in)
-H = GraphConvolution(1024*1024, support, num_bases=BASES, featureless=False, bias=True,
-                     activation='relu')([H] + A_in)#,
-                     #W_regularizer=l1(L2))([H] + A_in)
-#H = Dropout(DO)(H)
 # H = GraphConvolution(1024, support, num_bases=BASES, featureless=False, bias=True,
-#                      activation='relu')([H] + A_in)
+#                      activation='relu')([H] + A_in)#,
+#                      #W_regularizer=l1(L2))([H] + A_in)
+#H = Dropout(DO)(H)
+H = GraphConvolution(10000, support, num_bases=BASES, featureless=False, bias=True,
+                     activation='relu')([H] + A_in)
 # H = GraphConvolution(1024, support, num_bases=BASES, featureless=False, bias=True,
 #                      activation='relu')([H] + A_in)
 # H = GraphConvolution(1024, support, num_bases=BASES, featureless=False, bias=True,
@@ -115,7 +113,7 @@ yd = np.concatenate((X_y_train[0].todense(), y_train[0].todense()), axis=1)
 #tr = sp.vstack(([sp.hstack((x.todense(), a)) for x, a in zip(X_train, A_train)]))
 preds = None
 #model.fit([np.concatenate((X_train[0].todense(), X_train[1].todense()), axis=0), sp.vstack((A_train[0], A_train[1]))], sp.vstack((y_train[0], y_train[1])), epochs=50, verbose=2, batch_size=128)
-model.fit(tr, yd, epochs=NB_EPOCH, verbose=2, batch_size=128)
+model.fit(tr, yd, epochs=NB_EPOCH, verbose=2, batch_size=1)
 preds = model.predict(tr, batch_size=128)
 
 plt.subplot(3, 1, 1)
