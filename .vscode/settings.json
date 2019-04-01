@@ -1,4 +1,10 @@
 {
     "python.pythonPath": "/Users/brett/.virtualenvs/ensc813/bin/python",
-    "python.venvPath": "/Users/brett/.virtualenvs/"
+    "python.venvPath": "/Users/brett/.virtualenvs/",
+    "python.unitTest.pyTestArgs": [
+        "keras-gcn"
+    ],
+    "python.unitTest.unittestEnabled": false,
+    "python.unitTest.nosetestsEnabled": false,
+    "python.unitTest.pyTestEnabled": true
 }
